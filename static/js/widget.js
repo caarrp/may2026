@@ -9,7 +9,12 @@ class webGL_canvas{
         this.canvas.width = 2000;
         this.canvas.height = 2000;
 
+	//calculator
 	this.calculator = new calculator3D();
+	this.points_buffer = null;
+	this.total_points = null;
+	this.mesh_buffer = null;
+
         this.gl = this.canvas.getContext('webgl');
 
         if (!this.gl) {
@@ -19,7 +24,8 @@ class webGL_canvas{
 
 	this.input = "";
 	this.dark;
-
+	
+	//grids
 	this.xy_grid_buffer = null;
 	this.xz_grid_buffer = null;
 	this.yz_grid_buffer = null;
@@ -29,6 +35,11 @@ class webGL_canvas{
         this.setup_buffers();
         this.setup_shaders();
         this.render();
+    }
+
+//UPDATE
+    update_graph(){
+	console.log("\tinput in widget is " + this.input);
     }
 
 
@@ -44,6 +55,9 @@ class webGL_canvas{
             this.gl.uniform3f(this.colorLoc, 0.5, 0.5, 0.5);//gray grid!
             this.gl.drawArrays(this.gl.LINES, 0, this.xz_grid_buffer.vertexCount);
         }
+
+	//if this.mesh_buffer
+	//if this.points_buffer
         
         requestAnimationFrame(() => this.render());
     }
@@ -241,7 +255,7 @@ setup_grid(x_enabled, y_enabled, z_enabled) {
         }
     }
     
-    console.log("grid vertices created:", vertices.length / 3);
+    //console.log("grid vertices created:", vertices.length / 3);
     const buffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
