@@ -12,6 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const equation = input.value;
         console.log("\tfrom user: equation: ", equation);
 
+	input.value= "";
         //sends to calculator through webgl
         if (webgl && webgl.calculator) {
 	    webgl.input = equation;
@@ -22,4 +23,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+    }
+}

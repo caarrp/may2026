@@ -8,6 +8,8 @@ class webGL_canvas{
 	this.canvas = document.getElementById('webgl-canvas')
         this.canvas.width = 2000;
         this.canvas.height = 2000;
+	this.depth = 10;
+	this.step = 1;
 
 	//calculator
 	this.calculator = new calculator3D();
@@ -39,7 +41,7 @@ class webGL_canvas{
 
 //UPDATE
     update_graph(){
-	console.log("\tinput in widget is " + this.input);
+	//console.log("\tinput in widget is " + this.input);
     }
 
 
@@ -212,8 +214,8 @@ class webGL_canvas{
 
 
 setup_grid(x_enabled, y_enabled, z_enabled) {
-    const depth = 10;
-    const step = 1;
+    const depth = this.depth;
+    const step = this.step;
     const vertices = [];
     
     //XZ
