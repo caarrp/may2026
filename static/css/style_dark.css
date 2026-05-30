@@ -1,5 +1,6 @@
-/* DIV */
-#canvas-container {/* controls positioning, scrolling etc*/
+
+
+#widget-container {/* controls positioning, scrolling etc*/
     position: relative; 
     top: 0;
     width: 100%;
