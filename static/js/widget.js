@@ -23,7 +23,7 @@ class webGL_canvas{
         }
 
 	this.input = "";
-	this.dark;
+	this.dark = false;
 	
 	//grids
 	this.xy_grid_buffer = null;
