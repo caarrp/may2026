@@ -1,2 +1,2 @@
 # may2026
-desmos graphing calculator.
+3D graphing calculator.
