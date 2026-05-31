@@ -18,6 +18,9 @@ class webGL_canvas{
 	this.mesh_buffer = null;
 
         this.gl = this.canvas.getContext('webgl');
+	this.errors = [];
+	this.debugger = new WebGLDebugger(this.gl);
+        console.log("\twebGL debugger initialized");
 
         if (!this.gl) {
             console.error("WebGL not supported!");
@@ -65,10 +68,11 @@ class webGL_canvas{
 		vertexCount: this.calculator.vertex_buffer.length / 3
 	    };
 	    
-	    console.log("\tWebGL buffer created with", this.points_buffer.vertexCount, "points");
+	    console.log("\twebGL buffer created with", this.points_buffer.vertexCount, "points");
 	} else {
 	    console.warn("\tNo vertices to buffer");
 	}
+	this.render();
 
     }
 
@@ -91,6 +95,7 @@ class webGL_canvas{
 	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.points_buffer.buffer);
 	    this.gl.vertexAttribPointer(this.positionLoc, 3, this.gl.FLOAT, false, 0, 0);
 	    this.gl.uniform3f(this.colorLoc, 1.0, 0.0, 0.0); // Red points
+	            this.gl.enable(this.gl.PROGRAM_POINT_SIZE);
 	    this.gl.drawArrays(this.gl.POINTS, 0, this.points_buffer.vertexCount);
 
 	}
