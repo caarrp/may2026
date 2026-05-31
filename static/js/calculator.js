@@ -56,7 +56,7 @@ class calculator3D{
 	if (this.is_implicit){
 	    console.log("\timplicit case or other:");
 	    //check if is a quadradic
-	    calssify_quadratic();
+	    this.classify_quadratic();
 
 
 	    const expr = this.list_input.join('');

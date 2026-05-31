@@ -6,7 +6,7 @@ class webGL_canvas{
     constructor(){
 
 	this.canvas = document.getElementById('webgl-canvas')
-        this.canvas.width = 2000;
+        this.canvas.width = 3000;
         this.canvas.height = 2000;
 	this.depth = 10;
 	this.step = 1;
@@ -167,8 +167,10 @@ class webGL_canvas{
             attribute vec3 aPosition;
             uniform mat4 uProjectionMatrix;
             uniform mat4 uViewMatrix;
+	    uniform float uPointSize;
             void main() {
 		gl_PointSize = 15.0;
+		gl_PointSize = uPointSize;
                 gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
             }
         `;
