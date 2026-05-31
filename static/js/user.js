@@ -8,6 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('go-button');
     const input = document.getElementById('input-eqn');
     
+    //GO BUTTON
     button.addEventListener('click', () => {
         const equation = input.value;
         console.log("\tfrom user: equation: ", equation);
@@ -21,6 +22,12 @@ window.addEventListener('DOMContentLoaded', () => {
             webgl.calculator.set_function(equation);
 	    console.log("in user: calling update_graph...");
             webgl.update_graph();
+
+	    const lowButtonContainer = document.getElementById('low-button-container');
+	    if (webgl.calculator.is_valid) {
+	    lowButtonContainer.style.display = 'flex';
+	    }
+
         }
     });
 
@@ -28,6 +35,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	let is_dark = webgl.dark || false ;
 	let themeLink = document.getElementById('theme-stylesheet');
 
+	//LIGHT ? DARK BUTTON
 	themeButton.addEventListener('click', () => {
 	    is_dark = !is_dark;
 	    
@@ -54,9 +62,9 @@ window.addEventListener('DOMContentLoaded', () => {
 	//for isometric/perspective button
 
 	const isoButton = document.getElementById("view-button");
-	let is_iso = webgl.is_iso;
+	let is_iso = webgl.iso;
 
-
+	//ISOMETRIC ? PERSPECTIVE BUTTON
 	isoButton.addEventListener('click', () => {
 	    is_iso = !is_iso;
 
@@ -69,7 +77,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		isoButton.textContent = 'isometric';
 		console.log('\tset isometric');
 	    }
-	    webgl.is_iso = is_iso;
+	    webgl.iso = is_iso;
+	    webgl.render();
 
 	});
 });

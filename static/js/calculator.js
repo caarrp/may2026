@@ -31,6 +31,10 @@ class calculator3D{
 
 	//for explicit functions
 	this.z_form = "";
+	this.jsmath_z_form = "";
+
+	//for implicit functions
+	//this.
     }
 
 
@@ -68,21 +72,22 @@ class calculator3D{
 //EXPLICIT MAP
     explicit_map(){
 	let expr = this.z_form;
+	let math_expr = this.jsmath_z_form;
 	//looks like x+1
 	let func;
 	
 	let h = 0.0001;
 	let df_dx_func = new Function('x', 'y', 
-	    `return (${expr.replace(/x/g, `(x+${h})`)} - ${expr.replace(/x/g, `(x-${h})`)}) / (2*${h});`
+	    `return (${math_expr.replace(/x/g, `(x+${h})`)} - ${math_expr.replace(/x/g, `(x-${h})`)}) / (2*${h});`
 	);
 	//for calculating gradient (normals)
 	let df_dy_func = new Function('x', 'y',  // Fixed: added df_dy_func
-	    `return (${expr.replace(/y/g, `(y+${h})`)} - ${expr.replace(/y/g, `(y-${h})`)}) / (2*${h});`
+	    `return (${math_expr.replace(/y/g, `(y+${h})`)} - ${math_expr.replace(/y/g, `(y-${h})`)}) / (2*${h});`
 	);
 
 	try {
-	    func = new Function('x', 'y', `return ${expr};`);
-	    console.log(`\tFunction compiled: z = ${expr}`);
+	    func = new Function('x', 'y', `return ${math_expr};`);
+	    console.log(`\tFunction compiled: z = ${math_expr}`);
 	} catch(e) {
 	    console.error(`\tFailed to compile function: ${e}`);
 	    return null;
@@ -144,10 +149,10 @@ class calculator3D{
 			index: vertices.length
 		    };
 		    vertices.push(point);
-		    vertex.push(x, y, z);
+		    vertex.push(x, z, y);
 		    //points.push(point);
 		    normals.push({x: nx, y: ny, z: nz});
-		    normal.push(nx, ny, nz);
+		    normal.push(nx, nz, ny);
 
 		} catch(e) {
 		    console.warn(`\terror at (${x.toFixed(2)}, ${y.toFixed(2)}): ${e.message}`);
@@ -201,69 +206,109 @@ class calculator3D{
             // Example: "x^2 + y^2 = z^2" → solve for z
             // For now, store as is and mark as implicit
             this.implicit_eqn = `${left_side.join('')}=${right_side.join('')}`;
-            this.equation_type = "implicit";
             console.log(`\tImplicit equation (cannot convert to z= directly): ${this.implicit_eqn}`);
 	}
     }
 
-//WRITE EXPs out
-carrot(list) {
-    if (list == null) return list;
-    
-    let result = [];
-    
-    for (let i = 0; i < list.length; i++) {
-        let token = list[i];
-        
-        if (token == "^") {
-            let variable = result[result.length - 1];  
-            let exponent = list[i + 1];               
-            
-            if (variable && exponent) {
-                result.pop();
-                
-                let expNum = parseInt(exponent);
-                
-                if (!isNaN(expNum) && expNum > 0) {
-                    let multiplicationChain = [];
-                    for (let j = 0; j < expNum; j++) {
-                        multiplicationChain.push(variable);
-                        if (j < expNum - 1) {
-                            multiplicationChain.push("*");
-                        }
-                    }
-                    
-                    result.push(...multiplicationChain);
-                } else {
-                    result.push({
-                        type: 'binary',
-                        operator: '^',
-                        left: variable,
-                        right: exponent
-                    });
-                }
-                
-                i++; 
-            }
-        } else {
-            result.push(token);
-        }
+
+
+    carrot(list) {
+	console.log("in carrot");
+	if (list == null) return list;
+	
+	let result = [];
+	let math_result = [];
+	
+	for (let i = 0; i < list.length; i++) {
+	    let token = list[i];
+	    
+	    if (token == "^") {
+		let left = result[result.length - 1];
+		let left_math = math_result[result.length - 1];
+		let right = list[i + 1];
+		
+		if (left && right) {
+		    math_result.pop(); 
+		    result.push(token);
+		    result.push(list[i+1]);//TODO fix later
+		    
+		    let expNum = parseFloat(right);
+		    
+		    if (!isNaN(expNum) && Number.isInteger(expNum) && expNum > 0) {
+			let multiplicationChain = [];
+			for (let j = 0; j < expNum; j++) {
+			    multiplicationChain.push(left);
+			    if (j < expNum - 1) {
+				multiplicationChain.push("*");
+			    }
+			}
+			math_result.push(...multiplicationChain);
+		    } else {
+			math_result.push(`Math.pow(${left}, ${right})`);
+		    }
+		    i++; 
+		}
+	    } 
+	    //enhanced carrot also handles math functions
+	    else if (token === "sin" || token === "cos" || token === "tan") {
+		result.push(token);
+		math_result.push(`Math.${token}`);
+	    }
+	    else if (token === "ln") {
+		result.push(token);
+		math_result.push("Math.log");
+	    }
+	    else if (token === "log") {
+		result.push(token);
+		math_result.push("Math.log10");
+	    }
+	    else if (token === "exp") {
+		result.push(token);
+		math_result.push("Math.exp");
+	    }
+	    else if (token === "sqrt") {
+		result.push(token);
+		math_result.push("Math.sqrt");
+	    }
+	    else if (token === "abs") {
+		result.push(token);
+		math_result.push("Math.abs");
+	    }
+	    // Handle constant e
+	    else if (token === "e") {
+		result.push(token);
+		result.push("Math.E");
+	    }
+	    // Handle pi
+	    else if (token === "pi" || token === "π") {
+		result.push(token);
+		math_result.push("Math.PI");
+	    }
+	    else {
+		math_result.push(token);
+		result.push(token);
+	    }
+	}//end for loop
+	
+	let math_str = math_result.join('');
+	math_str = math_str.replace("z", "");
+	math_str = math_str.replace("=", "");
+	this.jsmath_z_form = math_str;
+	console.log("\tmath z form : " + this.jsmath_z_form);
+	console.log("\tz form : " + result);
+	return result;
     }
-    return result;
-}
+
 
 
 //PARSE FUNCTION
-parse_function(){
+    parse_function(){
 	console.log("in parse_function");
-	if (this.input != ""){
-	    console.log("\tinput is " + this.input);
-	    let list = this.input.match(/(\d+\.?\d*|\+|\-|\*|\/|\^|x|y|f|g|h|z|\(|\))/g);
-	    console.log("\tparsed input is " + list);
 
 	    if (this.input != "") {
 		console.log("\tinput is " + this.input);
-		let list = this.input.match(/(\d+\.?\d*|\+|\-|\*|\/|\^|x|y|f|g|h|z|\(|\)|=)/g);
+		let list =
+		    this.input.match(/(\d+\.?\d*|\+|\-|\*|\/|\^|x|y|f|g|e|cos|abs|exp|tan|sqrt|sin|log|ln|h|z|\(|\)|=)/g);
 		console.log("\tparsed input is " + list);
 
 		if (list != null) {
@@ -277,10 +322,6 @@ parse_function(){
 
 		    for (let i = 0; i < list.length; i++) {
 			let token = list[i];
-			
-			if (token == "=") {
-			    bool = true;
-			}
 
 			if (token == "=") {
 			    bool = true;
@@ -355,13 +396,13 @@ parse_function(){
 		} else {
 		    this.is_valid = false;
 		    console.log("\tfunction is invalid:");
-		}
+		}//end has/not has list
 	    
 		//this.implicit_check(list, equal_index);
-	    }//end has list
+	    }///end has input
     
-	}//end has input
     }
+    
 
     set_function(eqn){
 	this.input = eqn;

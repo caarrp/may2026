@@ -19,6 +19,9 @@ class webGL_canvas{
 	this.mesh_buffer = null;
 	this.mesh = false;
 
+	//camera
+	this.camera = new Camera();
+
         this.gl = this.canvas.getContext('webgl');
 	this.errors = [];
 	//this.debugger = new WebGLDebugger(this.gl);
@@ -80,6 +83,7 @@ class webGL_canvas{
 
 //RENDER
     render() {
+
 	if (this.dark) {
 	    console.log("\tin user: is dark");
 	    this.gl.clearColor(15/255, 15/255, 15/255, 1.0);
@@ -122,13 +126,15 @@ class webGL_canvas{
 	    this.projectionMatrix = this.create_isometric(aspect);
 	    this.viewMatrix = this.create_isometric_view();
 	} else {
+	    console.log("in widget: creating perspective");
 	    this.projectionMatrix = this.create_perspective(45, aspect);
 	    this.viewMatrix = this.create_perspective_view();
 	}
+	this.gl.uniformMatrix4fv(this.projectionLoc, false, this.projectionMatrix);
+	this.gl.uniformMatrix4fv(this.viewLoc, false, this.viewMatrix);
 
         requestAnimationFrame(() => this.render());
     }
-
 
 
 
@@ -228,6 +234,8 @@ class webGL_canvas{
         ]);
     }
     
+
+//FOR ISOMETRIC
     create_isometric_view() {
         // Camera position for classic isometric view (120° between axes)
         // Position at 45° rotation and 35.264° pitch (true isometric)
@@ -257,6 +265,8 @@ class webGL_canvas{
         ]);
     }
     
+
+
     //maths
     normalize(v) {
         const len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
@@ -280,59 +290,113 @@ class webGL_canvas{
     }
 
 
-setup_grid(x_enabled, y_enabled, z_enabled) {
-    const depth = this.depth;
-    const step = this.step;
-    const vertices = [];
-    
-    //XZ
-    if (x_enabled && z_enabled && !y_enabled) {
-        for (let z = -depth; z <= depth; z += step) {
-            vertices.push(-depth, 0, z);
-            vertices.push(depth, 0, z);
-        }
-        
-        for (let x = -depth; x <= depth; x += step) {
-            vertices.push(x, 0, -depth);
-            vertices.push(x, 0, depth);
-        }
+    create_perspective(angle, aspect) {
+	console.log("in create perspective");
+	const fov = angle * Math.PI / 180;  // Convert to radians
+	const near = 0.1;
+	const far = 100;
+	const top = Math.tan(fov / 2) * near;
+	const bottom = -top;
+	const right = top * aspect;
+	const left = -right;
+	
+	// Perspective projection matrix
+	return new Float32Array([
+	    2 * near / (right - left), 0, 0, 0,
+	    0, 2 * near / (top - bottom), 0, 0,
+	    (right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1,
+	    0, 0, -(2 * far * near) / (far - near), 0
+	]);
     }
+
+    create_perspective_view() {
+	// Simple view from an angle (can be adjusted)
+
+	//lower camera
+    const cameraX = 0;  
+    const cameraY = 3; 
+    const cameraZ = 15;
     
-    //XY
-    else if (x_enabled && y_enabled && !z_enabled) {
-        for (let y = -depth; y <= depth; y += step) {
-            vertices.push(-depth, y, 0);
-            vertices.push(depth, y, 0);
-        }
-        
-        for (let x = -depth; x <= depth; x += step) {
-            vertices.push(x, -depth, 0);
-            vertices.push(x, depth, 0);
-        }
+    const eye = [cameraX, cameraY, cameraZ];
+    const center = [0, 0, 0];
+    const up = [0, 1, 0];
+
+	console.log("in create perspective view");
+	/*const distance = 15;
+	const cameraX = 10;
+	const cameraY = 8;
+	const cameraZ = 12;	
+	const eye = [cameraX, cameraY, cameraZ];
+	const center = [0, 0, 0];
+	const up = [0, 1, 0];*/
+	
+	const f = this.normalize([center[0]-eye[0], center[1]-eye[1], center[2]-eye[2]]);
+	const s = this.normalize(this.cross(f, up));
+	const u = this.cross(s, f);
+	
+	return new Float32Array([
+	    s[0], u[0], -f[0], 0,
+	    s[1], u[1], -f[1], 0,
+	    s[2], u[2], -f[2], 0,
+	    -this.dot(s, eye), -this.dot(u, eye), this.dot(f, eye), 1
+	]);
     }
-    
-    //YZ 
-    else if (y_enabled && z_enabled && !x_enabled) {
-        for (let z = -depth; z <= depth; z += step) {
-            vertices.push(0, -depth, z);
-            vertices.push(0, depth, z);
-        }
-        
-        for (let y = -depth; y <= depth; y += step) {
-            vertices.push(0, y, -depth);
-            vertices.push(0, y, depth);
-        }
-    }
-    
-    //console.log("grid vertices created:", vertices.length / 3);
-    const buffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-    
-    return {
-        buffer: buffer,
-        vertexCount: vertices.length / 3
-	};
-    }
+
+
+
+    setup_grid(x_enabled, y_enabled, z_enabled) {
+	const depth = this.depth;
+	const step = this.step;
+	const vertices = [];
+	
+	//XZ
+	if (x_enabled && z_enabled && !y_enabled) {
+	    for (let z = -depth; z <= depth; z += step) {
+		vertices.push(-depth, 0, z);
+		vertices.push(depth, 0, z);
+	    }
+	    
+	    for (let x = -depth; x <= depth; x += step) {
+		vertices.push(x, 0, -depth);
+		vertices.push(x, 0, depth);
+	    }
+	}
+	
+	//XY
+	else if (x_enabled && y_enabled && !z_enabled) {
+	    for (let y = -depth; y <= depth; y += step) {
+		vertices.push(-depth, y, 0);
+		vertices.push(depth, y, 0);
+	    }
+	    
+	    for (let x = -depth; x <= depth; x += step) {
+		vertices.push(x, -depth, 0);
+		vertices.push(x, depth, 0);
+	    }
+	}
+	
+	//YZ 
+	else if (y_enabled && z_enabled && !x_enabled) {
+	    for (let z = -depth; z <= depth; z += step) {
+		vertices.push(0, -depth, z);
+		vertices.push(0, depth, z);
+	    }
+	    
+	    for (let y = -depth; y <= depth; y += step) {
+		vertices.push(0, y, -depth);
+		vertices.push(0, y, depth);
+	    }
+	}
+	
+	//console.log("grid vertices created:", vertices.length / 3);
+	const buffer = this.gl.createBuffer();
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+	this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+	
+	return {
+	    buffer: buffer,
+	    vertexCount: vertices.length / 3
+	    };
+	}
 
 }
