@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Graphing Calculator</title>
 
-  <link rel="stylesheet" href="static/css/style_light.css">
+  <link id="theme-stylesheet" rel="stylesheet" href="static/css/style_light.css">
   </link>
   <script src="static/js/calculator.js"></script>
   <script src="static/js/widget.js"></script>
@@ -17,7 +17,10 @@
 </head>
 
 <body>
-
+  <div id="button-container">
+    <button id="light-dark-button" class="top-button">light</button>
+    <button id="view-button" class="top-button">isometric</button>
+  </div>
 
   <div id="widget-container">
     <canvas id="webgl-canvas"></canvas>

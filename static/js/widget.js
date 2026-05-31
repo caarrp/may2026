@@ -29,6 +29,7 @@ class webGL_canvas{
 
 	this.input = "";
 	this.dark = false;
+	this.iso = true;
 	
 	//grids
 	this.xy_grid_buffer = null;
@@ -76,6 +77,13 @@ class webGL_canvas{
 
 //RENDER
     render() {
+	if (this.dark) {
+	    console.log("\tin user: is dark");
+	    this.gl.clearColor(15/255, 15/255, 15/255, 1.0);
+	} else {
+	    console.log("\tin user: is light");
+	    this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
+	}
         //clear screen
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         

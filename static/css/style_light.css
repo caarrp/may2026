@@ -1,7 +1,24 @@
+.top-button {
+    padding: 10px 20px;
+    margin: 2px 2px 2px 0;
+    font-size: 12px;
+    border: none;
+    border-radius: 2px;
+}
 
+#button-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 2;
+}
 
 
 body, html {
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: 0;
     width: 100%;

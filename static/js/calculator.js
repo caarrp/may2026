@@ -206,7 +206,51 @@ class calculator3D{
 	}
     }
 
-
+//WRITE EXPs out
+carrot(list) {
+    if (list == null) return list;
+    
+    let result = [];
+    
+    for (let i = 0; i < list.length; i++) {
+        let token = list[i];
+        
+        if (token == "^") {
+            let variable = result[result.length - 1];  
+            let exponent = list[i + 1];               
+            
+            if (variable && exponent) {
+                result.pop();
+                
+                let expNum = parseInt(exponent);
+                
+                if (!isNaN(expNum) && expNum > 0) {
+                    let multiplicationChain = [];
+                    for (let j = 0; j < expNum; j++) {
+                        multiplicationChain.push(variable);
+                        if (j < expNum - 1) {
+                            multiplicationChain.push("*");
+                        }
+                    }
+                    
+                    result.push(...multiplicationChain);
+                } else {
+                    result.push({
+                        type: 'binary',
+                        operator: '^',
+                        left: variable,
+                        right: exponent
+                    });
+                }
+                
+                i++; 
+            }
+        } else {
+            result.push(token);
+        }
+    }
+    return result;
+}
 
 
 //PARSE FUNCTION
@@ -297,8 +341,11 @@ parse_function(){
 
 		    if (valid) {
 			console.log( "\tfunction is valid");
-			this.convert_zfunction(list, bool, equal_index);
-			this.list_input = list;
+			let new_list = this.carrot(list);
+			this.convert_zfunction(new_list, bool, equal_index);
+
+			console.log( "\tnew list is " + new_list);
+			this.list_input = new_list;
 		    } else {
 			console.log("\tfunction is invalid:");
 			errors.forEach(err => console.log(`  - ${err}`));
