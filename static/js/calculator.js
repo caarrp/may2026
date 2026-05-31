@@ -350,8 +350,10 @@ class calculator3D{
 
 	let left_side = list.slice(0, equal_index);
 	console.log("\tleft_side is " + left_side);
+	if (left_side == "z"){ return;}
 	let right_side = list.slice(equal_index + 1, list.length);
 	console.log("\tright_side is " + right_side);
+	if (right_side == "z"){ return;}
 
 	let left_z = (left_side.length === 1 && 
 		(left_side[0] === "z" || left_side[0] === "f" || left_side[0] === "g" || left_side[0] === "h"));
