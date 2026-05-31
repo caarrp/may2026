@@ -39,6 +39,10 @@ class calculator3D{
 
 
 
+//IMPLICIT 
+
+
+
 
 //INTERPRET FUNCTION
     interpret_function(){
@@ -50,7 +54,11 @@ class calculator3D{
 	}
 	
 	if (this.is_implicit){
-	    console.log("\timplicit case:");
+	    console.log("\timplicit case or other:");
+	    //check if is a quadradic
+	    calssify_quadratic();
+
+
 	    const expr = this.list_input.join('');
 
 
@@ -66,6 +74,23 @@ class calculator3D{
 	//    this.get_facets();
 	//}
     }
+
+
+//CLASSIFY QUADRATIC
+    classify_quadratic(){
+	let expr = this.list;
+	let has_x2 = false, has_y2 = false, has_z2 = false;
+	let has_xy = false, has_xz = false, has_yz = false;
+	let has_x = false, has_y = false, has_z = false;
+
+	
+
+
+    }
+
+
+
+
 
 
 

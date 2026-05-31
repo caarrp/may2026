@@ -291,7 +291,7 @@ class webGL_canvas{
 
 
     create_perspective(angle, aspect) {
-	console.log("in create perspective");
+	//console.log("in create perspective");
 	const fov = angle * Math.PI / 180;  // Convert to radians
 	const near = 0.1;
 	const far = 100;
@@ -312,23 +312,23 @@ class webGL_canvas{
     create_perspective_view() {
 	// Simple view from an angle (can be adjusted)
 
-	//lower camera
-    const cameraX = 0;  
+	//lower camera 
+    /*const cameraX = 0;  
     const cameraY = 3; 
     const cameraZ = 15;
     
     const eye = [cameraX, cameraY, cameraZ];
     const center = [0, 0, 0];
-    const up = [0, 1, 0];
+    const up = [0, 1, 0];*/
 
-	console.log("in create perspective view");
-	/*const distance = 15;
+	//console.log("in create perspective view");
+	const distance = 15;
 	const cameraX = 10;
 	const cameraY = 8;
 	const cameraZ = 12;	
 	const eye = [cameraX, cameraY, cameraZ];
 	const center = [0, 0, 0];
-	const up = [0, 1, 0];*/
+	const up = [0, 1, 0];
 	
 	const f = this.normalize([center[0]-eye[0], center[1]-eye[1], center[2]-eye[2]]);
 	const s = this.normalize(this.cross(f, up));
