@@ -19,8 +19,8 @@ class webGL_canvas{
 
         this.gl = this.canvas.getContext('webgl');
 	this.errors = [];
-	this.debugger = new WebGLDebugger(this.gl);
-        console.log("\twebGL debugger initialized");
+	//this.debugger = new WebGLDebugger(this.gl);
+        //console.log("\twebGL debugger initialized");
 
         if (!this.gl) {
             console.error("WebGL not supported!");
@@ -59,18 +59,15 @@ class webGL_canvas{
 	    let vertex_buffer = this.calculator.vertex_buffer;
 	    
 	    // CREATE WebGL buffer (THIS IS THE MISSING STEP)
-	    const buffer = this.gl.createBuffer();
-	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+	    this.points_buffer = this.gl.createBuffer();
+	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.points_buffer);
 	    this.gl.bufferData(this.gl.ARRAY_BUFFER, vertex_buffer, this.gl.STATIC_DRAW);
 	    
-	    this.points_buffer = {
-		buffer: buffer,
-		vertexCount: this.calculator.vertex_buffer.length / 3
-	    };
+	    this.total_points = this.calculator.vertex_buffer.length / 3;
 	    
-	    console.log("\twebGL buffer created with", this.points_buffer.vertexCount, "points");
+	    console.log("\twebGL buffer created with", this.total_points, "points");
 	} else {
-	    console.warn("\tNo vertices to buffer");
+	    console.warn("\tno vertices to buffer");
 	}
 	this.render();
 
@@ -92,11 +89,19 @@ class webGL_canvas{
 
 	//if this.mesh_buffer
 	if (this.points_buffer){
-	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.points_buffer.buffer);
+
+	    //console.log('\tbuffer exists:', this.points_buffer);
+	    //console.log('\tis webGLBuffer?', this.points_buffer instanceof WebGLBuffer);
+	    //const positionLoc = this.gl.getAttribLocation(program, 'a_position');
+	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.points_buffer);
+
+    //const boundBuffer = this.gl.getParameter(this.gl.ARRAY_BUFFER_BINDING);
+    //console.log('\tcurrently bound buffer:', boundBuffer === this.points_buffer ? 'MATCH' : 'MISMATCH');
+
 	    this.gl.vertexAttribPointer(this.positionLoc, 3, this.gl.FLOAT, false, 0, 0);
 	    this.gl.uniform3f(this.colorLoc, 1.0, 0.0, 0.0); // Red points
-	            this.gl.enable(this.gl.PROGRAM_POINT_SIZE);
-	    this.gl.drawArrays(this.gl.POINTS, 0, this.points_buffer.vertexCount);
+	    this.gl.enable(this.gl.PROGRAM_POINT_SIZE);
+	    this.gl.drawArrays(this.gl.POINTS, 0, this.total_points);
 
 	}
         requestAnimationFrame(() => this.render());
@@ -129,15 +134,18 @@ class webGL_canvas{
 
 //SETUP SHADER
     setup_shaders(){
+	//VERTEX SHADER
         const vsSource = `
             attribute vec3 aPosition;
             uniform mat4 uProjectionMatrix;
             uniform mat4 uViewMatrix;
             void main() {
+		gl_PointSize = 15.0;
                 gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
             }
         `;
 
+	//FRAGMENT SHADER
         const fsSource = `
             precision mediump float;
             uniform vec3 uColor;
