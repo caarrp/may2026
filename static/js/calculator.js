@@ -34,7 +34,9 @@ class calculator3D{
 	this.jsmath_z_form = "";
 
 	//for implicit functions
-	//this.
+	//if its spherically parameterized
+	this.a = 1; this.c = 1;
+	this.b = 1; this.d = 1; 
     }
 
 
@@ -56,7 +58,7 @@ class calculator3D{
 	if (this.is_implicit){
 	    console.log("\timplicit case or other:");
 	    //check if is a quadradic
-	    calssify_quadratic();
+	    this.check_quadric();
 
 
 	    const expr = this.list_input.join('');
@@ -76,18 +78,160 @@ class calculator3D{
     }
 
 
-//CLASSIFY QUADRATIC
-    classify_quadratic(){
-	let expr = this.list;
+    generate_quadric() {
+	let res = this.resolution;
+	let res_phi = res;
+	let res_theta = res * 2;
+	
+	let vertices = [];
+	let facets = [];//unused
+	let vertex_data = [];
+	let normal_data = [];
+	let facet_data = [];
+	
+	for (let i = 0; i <= res_phi; i++) {
+	    let phi = (i / res_phi) * Math.PI;
+	    let sin_phi = Math.sin(phi);
+	    let cos_phi = Math.cos(phi);
+	    
+	    for (let j = 0; j <= res_theta; j++) {
+		let theta = (j / res_theta) * 2 * Math.PI;
+		let cos_theta = Math.cos(theta);
+		let sin_theta = Math.sin(theta);
+		
+		let denominator = this.a * sin_phi * sin_phi * cos_theta * cos_theta + 
+				this.b * sin_phi * sin_phi * sin_theta * sin_theta + 
+				this.c * cos_phi * cos_phi;
+		
+		if (denominator * this.d > 0) {
+		    let r = Math.sqrt(this.d / denominator);
+		    
+		    let x = r * sin_phi * cos_theta;
+		    let y = r * sin_phi * sin_theta;
+		    let z = r * cos_phi;
+		    
+		    vertices.push({ x, y, z });
+		    
+		    vertex_data.push(x, z, y);
+		    
+		    let nx = 2 * this.a * x;
+		    let ny = 2 * this.b * y;
+		    let nz = 2 * this.c * z;
+		    let len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+		    
+		    normal_data.push(
+			len > 0 ? nx/len : 0,
+			len > 0 ? nz/len : 0,  // swapped
+			len > 0 ? ny/len : 0   // swapped
+		    );
+		    
+		} else {
+		    vertices.push({ x: 0, y: 0, z: 0 });
+		    vertex_data.push(0, 0, 0);
+		    normal_data.push(0, 0, 0);
+		}
+	    }
+	}
+	
+	this.vertices = vertices;
+	this.vertex_buffer = new Float32Array(vertex_data);
+	this.normal_buffer = new Float32Array(normal_data);
+	
+	console.log(`\tgnerated ${vertices.length} quadric surface points`);
+    }
+
+
+//CHECK QUADRATIC
+    check_quadric(){
+	let list = this.list_input;  // Fixed: use list, not expr
 	let has_x2 = false, has_y2 = false, has_z2 = false;
 	let has_xy = false, has_xz = false, has_yz = false;
 	let has_x = false, has_y = false, has_z = false;
 
-	
+	//list of form [ x, ^, 2, ...]
+	if (!list) return null;
 
+	let equal_index = list.indexOf('=');
+	if (equal_index === -1) return null;
 
+	let left_side = list.slice(0, equal_index);
+	let right_side = list.slice(equal_index + 1, list.length);
+	let var_side, const_side, d;
+
+	if (left_side.length === 1 && !isNaN(parseFloat(left_side[0]))) {
+	    d = parseFloat(left_side[0]);
+	    var_side = right_side;
+	}
+	//assigns r, l sides
+	else if (right_side.length === 1 && !isNaN(parseFloat(right_side[0]))) {
+	    d = parseFloat(right_side[0]);
+	    var_side = left_side;
+	}
+	else {
+	    console.log("\tNo constant term found");
+	    return null;
+	}
+
+	let a = 0, b = 0, c = 0;
+	let i = 0; // i iterates though eqn
+
+	while (i < var_side.length) {
+	    if (var_side[i] === '+') {
+		i++;
+		continue;
+	    }
+	    let coeff = 1;
+	    let sign = 1;
+
+	    if (var_side[i] === '-') {
+		sign = -1;
+		i++;
+	    }
+	    if (i < var_side.length && !isNaN(parseFloat(var_side[i]))) {
+		coeff = parseFloat(var_side[i]);
+		i++;
+
+		if (i < var_side.length && var_side[i] === '/') {
+		    i++;
+		    if (i < var_side.length && !isNaN(parseFloat(var_side[i]))) {
+			coeff = coeff / parseFloat(var_side[i]);
+			i++;
+		    }
+		}
+	    }
+	    coeff *= sign;
+
+	    if (i >= var_side.length) break;
+
+	    let token = var_side[i];
+
+	    if ((token === 'x' || token === 'y' || token === 'z') &&
+		i + 2 < var_side.length &&
+		var_side[i+1] === '^' &&
+		var_side[i+2] === '2') {
+
+		if (token === 'x') a = coeff;
+		else if (token === 'y') b = coeff;
+		else if (token === 'z') c = coeff;
+
+		i += 3; // Skip variable, ^, 2
+	    } else {
+		return null;
+	    }
+	} // end while
+
+	// TODO add a case for cylinders here, bc ur doing all the work to catch them
+	if (a === 0 || b === 0 || c === 0) return null;
+
+	console.log(`\tCentered quadric: ${a}x^2 + ${b}y^2 + ${c}z^2 = ${d}`);
+
+	    this.a = a;
+	    this.b = b;
+	    this.c = c;
+	    this.d = d;
+
+	    this.generate_quadric();
     }
-
 
 
 
