@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	input.value= "";
         //sends to calculator through webgl
         if (webgl && webgl.calculator) {
-	    webgl.input = equation;
+	    //webgl.input = equation;
             webgl.calculator.set_function(equation);
             webgl.update_graph();
         }
