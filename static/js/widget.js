@@ -14,7 +14,7 @@ class webGL_canvas{
 	//calculator
 	this.calculator = new calculator3D();
 	this.points_buffer = null;
-	this.total_points = null;
+	this.total_points = 0;
 	this.mesh_buffer = null;
 
         this.gl = this.canvas.getContext('webgl');
@@ -41,16 +41,44 @@ class webGL_canvas{
 
 //UPDATE
     update_graph(){
-	//console.log("\tinput in widget is " + this.input);
+
+	if (!this.calculator.is_valid){
+	    console.error("Input equation is not valid");
+	    //this.showError("Invalid equation. Please check syntax.");
+	    return;
+	}
+
+	if (this.calculator.vertex_buffer && this.calculator.vertex_buffer.length > 0) {
+
+	    if (this.points_buffer) {
+		this.gl.deleteBuffer(this.points_buffer.buffer);
+	    }
+	    let vertex_buffer = this.calculator.vertex_buffer;
+	    
+	    // CREATE WebGL buffer (THIS IS THE MISSING STEP)
+	    const buffer = this.gl.createBuffer();
+	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+	    this.gl.bufferData(this.gl.ARRAY_BUFFER, vertex_buffer, this.gl.STATIC_DRAW);
+	    
+	    this.points_buffer = {
+		buffer: buffer,
+		vertexCount: this.calculator.vertex_buffer.length / 3
+	    };
+	    
+	    console.log("\tWebGL buffer created with", this.points_buffer.vertexCount, "points");
+	} else {
+	    console.warn("\tNo vertices to buffer");
+	}
+
     }
 
 
 //RENDER
     render() {
-        // Clear screen
+        //clear screen
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         
-        // Draw XZ grid
+        //draw XZ grid
         if (this.xz_grid_buffer) {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.xz_grid_buffer.buffer);
             this.gl.vertexAttribPointer(this.positionLoc, 3, this.gl.FLOAT, false, 0, 0);
@@ -59,8 +87,13 @@ class webGL_canvas{
         }
 
 	//if this.mesh_buffer
-	//if this.points_buffer
-        
+	if (this.points_buffer){
+	    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.points_buffer.buffer);
+	    this.gl.vertexAttribPointer(this.positionLoc, 3, this.gl.FLOAT, false, 0, 0);
+	    this.gl.uniform3f(this.colorLoc, 1.0, 0.0, 0.0); // Red points
+	    this.gl.drawArrays(this.gl.POINTS, 0, this.points_buffer.vertexCount);
+
+	}
         requestAnimationFrame(() => this.render());
     }
 
@@ -85,8 +118,7 @@ class webGL_canvas{
 	this.xy_grid_buffer = this.setup_grid(true, true, false);
 	this.xz_grid_buffer = this.setup_grid(true, false, true);
 	this.yz_grid_buffer = this.setup_grid(false, true, true);
-	
-	console.log("buffers created:");
+	//console.log("buffers created:");
     }
 
 

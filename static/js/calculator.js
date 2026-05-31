@@ -17,6 +17,7 @@ class calculator3D{
 	this.facets = null;
 
 	this.vertex_buffer = null;
+	this.normal_buffer = null;
 	this.edge_buffer = null; 
 	this.mesh_buffer = null;
 	
@@ -54,41 +55,14 @@ class calculator3D{
 	    this.explicit_map();
 	}
 
-	this.get_vertices();
-	this.get_normals();
+	//this.get_vertices();
+	//this.get_normals();
 
-	if (this.facets){
-	    this.get_facets();
-	}
+	//if (this.facets){
+	//    this.get_facets();
+	//}
     }
 
-
-    get_vertices() {
-	if (!this.vertex_buffer) return [];
-	let flat = [];
-	for (let v of this.vertex_buffer) {
-	    flat.push(v.x, v.y, v.z);
-	}
-	this.vertex_buffer = flat;
-    }
-
-    get_normals() {
-	if (!this.normals) return [];
-	let flat = [];
-	for (let n of this.normals) {
-	    flat.push(n.x, n.y, n.z);
-	}
-	this.vertex_buffer = flat;
-    }
-
-    get_facets() {
-	if (!this.facets) return [];
-	let idx = [];
-	for (let face of this.mesh_buffer) {
-	    idx.push(face.v1, face.v2, face.v3);
-	}
-	this.mesh_buffer = idx;
-    }
 
 
 //EXPLICIT MAP
@@ -130,6 +104,9 @@ class calculator3D{
 	//let points = [];        //point cloud ( which can be same as vertices)
 	let faces = [];
 
+	let vertex = [];
+	let normal = [];
+
 	console.log(`\tgenerating ${(res+1)*(res+1)} points...`);
 
 	for (let i = 0; i <= res; i++) {
@@ -167,8 +144,10 @@ class calculator3D{
 			index: vertices.length
 		    };
 		    vertices.push(point);
+		    vertex.push(x, y, z);
 		    //points.push(point);
 		    normals.push({x: nx, y: ny, z: nz});
+		    normal.push(nx, ny, nz);
 
 		} catch(e) {
 		    console.warn(`\terror at (${x.toFixed(2)}, ${y.toFixed(2)}): ${e.message}`);
@@ -178,6 +157,10 @@ class calculator3D{
 	console.log(`\tgenerated ${vertices.length} valid points`)
 	this.vertices = vertices;
 	this.normals = normals;
+
+	this.vertex_buffer = new Float32Array(vertex);
+	this.normal_buffer = new Float32Array(normal);
+
     }
 
 
@@ -337,6 +320,7 @@ parse_function(){
 	this.input = eqn;
 	this.parse_function();
 	this.interpret_function();
+
     }
 
 

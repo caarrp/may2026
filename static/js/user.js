@@ -16,7 +16,9 @@ window.addEventListener('DOMContentLoaded', () => {
         //sends to calculator through webgl
         if (webgl && webgl.calculator) {
 	    //webgl.input = equation;
+
             webgl.calculator.set_function(equation);
+	    console.log("in user: calling update_graph...");
             webgl.update_graph();
         }
     });
