@@ -14,8 +14,10 @@ class webGL_canvas{
 	//calculator
 	this.calculator = new calculator3D();
 	this.points_buffer = null;
+	this.points = false;
 	this.total_points = 0;
 	this.mesh_buffer = null;
+	this.mesh = false;
 
         this.gl = this.canvas.getContext('webgl');
 	this.errors = [];
@@ -70,6 +72,7 @@ class webGL_canvas{
 	} else {
 	    console.warn("\tno vertices to buffer");
 	}
+	this.points = true;
 	this.render();
 
     }
@@ -96,7 +99,7 @@ class webGL_canvas{
         }
 
 	//if this.mesh_buffer
-	if (this.points_buffer){
+	if (this.points_buffer && this.points){
 
 	    //console.log('\tbuffer exists:', this.points_buffer);
 	    //console.log('\tis webGLBuffer?', this.points_buffer instanceof WebGLBuffer);
@@ -112,6 +115,17 @@ class webGL_canvas{
 	    this.gl.drawArrays(this.gl.POINTS, 0, this.total_points);
 
 	}
+
+        const aspect = this.canvas.width / this.canvas.height;
+	//for if isometric or perspective
+	if (this.iso) {
+	    this.projectionMatrix = this.create_isometric(aspect);
+	    this.viewMatrix = this.create_isometric_view();
+	} else {
+	    this.projectionMatrix = this.create_perspective(45, aspect);
+	    this.viewMatrix = this.create_perspective_view();
+	}
+
         requestAnimationFrame(() => this.render());
     }
 

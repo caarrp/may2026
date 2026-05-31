@@ -6,13 +6,23 @@
     border-radius: 2px;
 }
 
-#button-container {
+
+#top-button-container {
     position: absolute;
     top: 10px;
     left: 10px;
     display: flex;
     gap: 5px;
     z-index: 2;
+}
+
+#low-button-container {
+    position: relative;
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    z-index: 2;
+    display: none;
 }
 
 
@@ -26,6 +36,12 @@ body, html {
     background-color: rgb(15, 15, 15);
 }
 
+
+body {
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+}
 
 /* DIV */
 #widget-container {/* controls positioning, scrolling etc*/
